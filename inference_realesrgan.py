@@ -7,6 +7,8 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
 from realesrgan.archs.srvgg_arch import SRVGGNetCompact
 
+from upload import uploader
+
 
 def main():
     """Inference demo for Real-ESRGAN.
@@ -42,6 +44,9 @@ def main():
     parser.add_argument(
         '-g', '--gpu-id', type=int, default=None, help='gpu device to use (default=None) can be 0,1,2 for multi-gpu')
 
+    # add upload endpoint argument
+
+    parser.add_argument('-u', '--upload_endpoint', type=str, default=None, help='Upload endpoint')
     args = parser.parse_args()
 
     # determine models according to model names
@@ -122,6 +127,16 @@ def main():
             else:
                 save_path = os.path.join(args.output, f'{imgname}_{args.suffix}.{extension}')
             cv2.imwrite(save_path, output)
+            print('writing to disk')
+            # Execute an upload here
+            if args.upload_endpoint:
+                uploader.upload(save_path, args.upload_endpoint)
+
+    # Delete the file ater it is done processing
+    if os.path.exists(args.input):
+        print('File exists. Removing...')
+        os.remove(args.input)
+        print(f"File {args.input} has been removed successfully.")
 
 
 if __name__ == '__main__':
