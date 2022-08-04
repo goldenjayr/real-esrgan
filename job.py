@@ -52,7 +52,7 @@ def scan_product_for_upscale():
                 file.write(img_data)
 
         # execute upscaler for all images in inputs folder
-        upscale.run(face_enhance=True, upload_endpoint=config.UPLOAD_API_URL, tile=64, fp32=True, entity=entity)
+        upscale.run(upload_endpoint=config.UPLOAD_API_URL, tile=64, fp32=True, entity=entity)
 
         # delete all the files in inputs folder after it is done processing
         print('Removing files in input directory.')
@@ -68,3 +68,11 @@ def scan_product_for_upscale():
             print(f'Removing {file}')
             os.remove(os.path.join(output_directory, file))
             print(f"File {file} has been removed successfully.")
+
+        # update product upscale status
+        print(f'Updating Product {product_name} -- is_upscaled: true')
+        payload = {'id': product_id, 'is_upscaled': True, 'metadata': {"initiated_by": 'upscaler'}}
+        res = requests.put(
+            config.API_URL + '/product', auth=HTTPBasicAuth(config.USERNAME, config.PASSWORD), data=payload)
+        if res.ok:
+            print(f'Product ID: {product_id} -- {product_name}  Done')
