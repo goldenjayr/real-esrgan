@@ -12,15 +12,16 @@ class Client:
         self.api_url = api_url
         self.max_byte_length = max_byte_length
 
-    def upload_file(self, file_path):
+    def upload_file(self, file_path, entity='files'):
         file_size = os.path.getsize(file_path)
-        headers = {"Filename": os.path.basename(file_path)}
+        filename = os.path.basename(file_path)
+        headers = {"Filename": filename}
 
         body = {
-            'filename': os.path.basename(file_path),
-            'entity': 'files',
+            'filename': filename,
+            'entity': entity,
             'total_file_size': str(file_size),
-            'uuid': uuid.uuid4()
+            'uuid': filename.split('.')[0]
         }
 
         with open(file_path, 'rb') as file:
@@ -40,13 +41,13 @@ class Client:
                 file.seek(start)
                 data = file.read(self.max_byte_length)
                 body['part_index'] = str(sent_chunk_count)
-                body['file'] = str({'filename': os.path.basename(file_path)})
+                body['file'] = str({'filename': filename})
 
                 start = end
                 files = {'file': data}
 
                 try:
-                    response = requests.post(self.api_url, headers=headers, data=body, files=files)
+                    response = requests.post(self.api_url + '/file/upload/entity', headers=headers, data=body, files=files)
                     print('RESPONSEEEEE -----', response.content)
                     if response.ok:
                         print('{}. chunk sent to server'.format(sent_chunk_count + 1))
