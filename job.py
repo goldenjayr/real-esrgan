@@ -41,10 +41,13 @@ def scan_product_for_upscale():
         print('Unique Images', unique_images)
 
         # get all images and store it in inputs folder
+        input_directory = 'inputs'
         for image in unique_images:
             img_data = requests.get(f'{config.UPLOAD_API_URL}/file?path={image}').content
             _, entity, file_name = image.split('/')
-            input_file_path = f'inputs/{file_name}'
+            input_file_path = f'{input_directory}/{file_name}'
+            if not os.path.exists(input_directory):
+                os.mkdir(input_directory)
             with open(input_file_path, 'wb') as file:
                 file.write(img_data)
 
@@ -53,7 +56,6 @@ def scan_product_for_upscale():
 
         # delete all the files in inputs folder after it is done processing
         print('Removing files in input directory.')
-        input_directory = 'inputs'
         for file in os.listdir(input_directory):
             print(f'Removing {file}')
             os.remove(os.path.join(input_directory, file))
